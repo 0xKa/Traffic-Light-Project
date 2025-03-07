@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Serialization;
 
 namespace Traffic_Light_Project
 {
@@ -58,7 +59,7 @@ namespace Traffic_Light_Project
         
         public int RedLightTime { get { return _RedLightTime; } set { _RedLightTime = value; } }
         public int YellowLightTime { get { return _YellowLightTime; } set { _YellowLightTime = value; } }
-        public int GreenLightTime { get { return _GreenLightTime; } set { _RedLightTime = value; } }
+        public int GreenLightTime { get { return _GreenLightTime; } set { _GreenLightTime = value; } }
 
         public class TrafficLightEventArgs : EventArgs
         {
@@ -82,31 +83,31 @@ namespace Traffic_Light_Project
 
         protected virtual void RaiseTrafficLightChanged(TrafficLightEventArgs e)
         {
-            TrafficLightChanged.Invoke(this, e);
+            TrafficLightChanged?.Invoke(this, e);
         }
         protected virtual void RaiseRedLightOn(TrafficLightEventArgs e)
         {
-            RedLightOn.Invoke(this, e);
+            RedLightOn?.Invoke(this, e);
         }
         protected virtual void RaiseRedLightOff(TrafficLightEventArgs e)
         {
-            RedLightOff.Invoke(this, e);
+            RedLightOff?.Invoke(this, e);
         }
         protected virtual void RaiseYellowLightOn(TrafficLightEventArgs e)
         {
-            YellowLightOn.Invoke(this, e);
+            YellowLightOn?.Invoke(this, e);
         }
         protected virtual void RaiseYellowLightOff(TrafficLightEventArgs e)
         {
-            YellowLightOff.Invoke(this, e);
+            YellowLightOff?.Invoke(this, e);
         }
         protected virtual void RaiseGreenLightOn(TrafficLightEventArgs e)
         {
-            GreenLightOn.Invoke(this, e);
+            GreenLightOn?.Invoke(this, e);
         }
         protected virtual void RaiseGreenLightOff(TrafficLightEventArgs e)
         {
-            GreenLightOff.Invoke(this, e);
+            GreenLightOff?.Invoke(this, e);
         }
 
         public ctrlTrafficLight()
@@ -143,9 +144,52 @@ namespace Traffic_Light_Project
             LightTimer.Stop();
         }
 
+        private void _ChangeLight()
+        {
+            switch (_CurrentLight)
+            {
+                case enLight.Red:
+
+                    CurrentLight = enLight.Yellow;
+                    _CurrentCountDownValue = YellowLightTime;
+                    lblCountDown.Text = _CurrentCountDownValue.ToString();
+                    RaiseYellowLightOn(new TrafficLightEventArgs(CurrentLight, _CurrentCountDownValue));
+
+                    break;
+                    
+                case enLight.Yellow:
+
+                    CurrentLight = enLight.Green;
+                    _CurrentCountDownValue = GreenLightTime;
+                    lblCountDown.Text = _CurrentCountDownValue.ToString();
+                    RaiseGreenLightOn(new TrafficLightEventArgs(CurrentLight, _CurrentCountDownValue));
+
+
+                    break;
+                    
+                case enLight.Green:
+
+                    CurrentLight = enLight.Red;
+                    _CurrentCountDownValue = RedLightTime;
+                    lblCountDown.Text = _CurrentCountDownValue.ToString();
+                    RaiseRedLightOn(new TrafficLightEventArgs(CurrentLight, _CurrentCountDownValue));
+
+
+                    break;
+
+            }
+        }
         private void LightTimer_Tick(object sender, EventArgs e)
         {
+            lblCountDown.Text = _CurrentCountDownValue.ToString();
 
+            if (_CurrentCountDownValue == 0)
+                _ChangeLight();
+            else
+                _CurrentCountDownValue--;
+            
         }
+
+
     }
 }
